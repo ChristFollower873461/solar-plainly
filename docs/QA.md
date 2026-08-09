@@ -61,3 +61,24 @@ fails on browser console errors.
   savings.
 - Field testing with homeowners, installers, and consumer advocates is still
   needed before calling the question set comprehensive.
+
+The acquisition paths, sample quotas, privacy controls, reviewer scopes, OCR
+benchmark, browser matrix, field-study waves, budget, and exit gates for closing
+these gaps are recorded in [the evidence and validation sourcing plan](SOURCING_PLAN.md).
+
+## Sourcing-plan documentation check
+
+The evidence and validation sourcing plan was added on August 9, 2026. The
+documentation-only change was verified against the existing product rather than
+treated as evidence that the proposed external research has already occurred.
+
+| Check | Result |
+| --- | --- |
+| `git diff --check` | Passed with no whitespace errors. |
+| `npm run check` | Passed: lint, 6 unit-test files with 22 tests, and production build. |
+| `npm run test:e2e` | Passed: 19 Chromium runs; 3 intentional project-specific skips. |
+
+Remaining gap: no outside organization, reviewer, participant, document owner,
+or browser-testing provider has yet agreed to participate. The plan names
+qualified acquisition channels and proposed gates; it does not claim those
+gates are complete.
