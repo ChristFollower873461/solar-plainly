@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a focused homeowner outcome.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: Homeowner job
+      description: What is the homeowner trying to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current workaround
+  - type: textarea
+    id: safety
+    attributes:
+      label: Privacy and accuracy considerations
+      description: Describe any contract, legal, tax, personal-data, or network implications.
+    validations:
+      required: true
