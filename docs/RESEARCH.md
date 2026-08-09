@@ -41,6 +41,7 @@ Product response:
 - separate possible cash price from financed amount;
 - flag tax-credit and payment-reset language;
 - flag transfer, payoff, and security-interest language;
+- calculate the difference, cost per watt, payment jump, and reference amortization with visible formulas;
 - never calculate whether financing is "good."
 
 ### Contract pressure and incomplete disclosure
@@ -52,6 +53,17 @@ Product response:
 - create questions rather than legal deadlines or conclusions;
 - check for cancellation instructions but tell the user to verify applicability;
 - avoid a green safety score that could encourage signing.
+
+### A contract is a packet, not one PDF
+
+The [California Public Utilities Commission's 2026 Solar Consumer Protection Guide](https://www.cpuc.ca.gov/-/media/cpuc-website/divisions/energy-division/documents/solar-guide/2025-versions/2025-updates/solarguide26_040626_textboxes.pdf) distinguishes the consumer guide, installation contract, financing agreement, disclosure documents, equipment and warranty information, and utility interconnection paperwork. It also surfaces total and monthly costs, financing terms, escalators, transfer obligations, and cancellation rights. California requirements are not universal law, but this is strong evidence that a one-file keyword scan is not a sufficient homeowner workflow.
+
+Product response:
+
+- accept a multi-document packet while preserving document and page provenance;
+- show a document checklist separately from contract-language coverage;
+- keep extracted terms editable and source-linked;
+- produce a brief that can be discussed with the installer, lender, utility, attorney, or tax professional.
 
 ### Tax guidance changes
 
@@ -70,6 +82,7 @@ The [Department of Energy's guide for buying a home with solar](https://www.ener
 Product response:
 
 - system passport for equipment, warranties, production, and monitoring;
+- user-initiated monitoring CSV import with monthly aggregation and replacement preview;
 - issue and service history for future owners;
 - 10% decline signal only after 24 monthly entries, with explicit alternative explanations;
 - no roof-climbing or electrical repair instructions.
@@ -123,7 +136,7 @@ Visual reference lock:
 - Every positive match keeps page and excerpt provenance.
 - Every negative match says "could not find" and explains extraction limitations.
 - Imported backup data is schema-validated before replacement.
-- File limits are 15 MB for contract analysis and 10 MB for saved record files.
+- Contract files, complete packets, monitoring CSVs, saved files, and backups have separate size limits.
 - The PWA has no public API, authentication, billing, or tenant data.
 - Optional AI analysis belongs in a future plugin boundary, never as a hidden default.
 

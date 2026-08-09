@@ -16,12 +16,17 @@ describe('analyzeContractPages', () => {
         'warranty-exclusions',
       ]),
     )
-    expect(analysis.findings.find((finding) => finding.id === 'security-interest')?.source?.page).toBe(5)
+    expect(analysis.findings.find((finding) => finding.id === 'security-interest')?.source).toEqual(
+      expect.objectContaining({ page: 3, documentName: 'Sunfield solar loan agreement.pdf' }),
+    )
     expect(analysis.facts).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: 'cash-price', value: '$31,500' }),
         expect.objectContaining({ id: 'financed-amount', value: '$42,900' }),
         expect.objectContaining({ id: 'system-size', value: '9.6 kW' }),
+        expect.objectContaining({ id: 'monthly-payment', value: '$159.00' }),
+        expect.objectContaining({ id: 'later-monthly-payment', value: '$231.00' }),
+        expect.objectContaining({ id: 'expected-prepayment', value: '$12,870' }),
       ]),
     )
   })

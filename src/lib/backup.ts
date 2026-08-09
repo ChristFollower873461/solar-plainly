@@ -1,10 +1,15 @@
 import { z } from 'zod'
+import { createDealFromFacts, createPacket } from './deal'
 import type { SolarData, StoredDocument } from '../types'
 
 const string = z.string()
 const storedDataUrlPattern = /^data:[^,]*;base64,/i
 
-const sourceSchema = z.object({ page: z.number().int().positive(), excerpt: string })
+const sourceSchema = z.object({
+  page: z.number().int().positive(),
+  excerpt: string,
+  documentName: string.optional(),
+})
 
 const findingSchema = z.object({
   id: string,
@@ -18,13 +23,72 @@ const findingSchema = z.object({
   note: string.optional(),
 })
 
-const solarDataSchema = z.object({
-  schemaVersion: z.literal(1),
+const pageSchema = z.object({
+  number: z.number().int().positive(),
+  text: string,
+  documentName: string.optional(),
+})
+
+const factSchema = z.object({ id: string, label: string, value: string, source: sourceSchema })
+const coverageSchema = z.object({ id: string, label: string, found: z.boolean(), guidance: string })
+
+const reviewBase = {
+  id: string,
+  name: string,
+  importedAt: string,
+  pages: z.array(pageSchema),
+  findings: z.array(findingSchema),
+  facts: z.array(factSchema),
+  coverage: z.array(coverageSchema),
+}
+
+const ownershipSchema = z.enum(['cash', 'loan', 'lease', 'ppa', 'unknown'])
+
+const dealSchema = z.object({
+  ownership: ownershipSchema,
+  cashPrice: string,
+  financedAmount: string,
+  financeCharge: string,
+  totalOfPayments: string,
+  downPayment: string,
+  aprPercent: string,
+  termYears: string,
+  monthlyPayment: string,
+  laterMonthlyPayment: string,
+  paymentChangeMonth: string,
+  expectedPrepayment: string,
+  ppaRate: string,
+  annualEscalatorPercent: string,
+  systemSizeKw: string,
+  annualProductionKwh: string,
+  currentUtilityBill: string,
+  remainingUtilityBill: string,
+  utilityEscalatorPercent: string,
+  installer: string,
+  lender: string,
+})
+
+const packetSchema = z.object({
+  key: z.enum([
+    'installation-contract',
+    'financing-agreement',
+    'solar-disclosure',
+    'proposal-production',
+    'equipment-spec',
+    'warranties',
+    'cancellation-form',
+    'utility-interconnection',
+  ]),
+  status: z.enum(['present', 'missing', 'unknown', 'not-applicable']),
+  note: string,
+})
+
+const commonSolarData = {
   updatedAt: string,
   profile: z.object({
     nickname: string,
     location: string,
-    ownership: z.enum(['cash', 'loan', 'lease', 'ppa', 'unknown']),
+    ownership: ownershipSchema,
     systemSizeKw: string,
     expectedAnnualKwh: string,
     installer: string,
@@ -33,21 +97,6 @@ const solarDataSchema = z.object({
     monitoringUrl: string,
     notes: string,
   }),
-  reviews: z.array(
-    z.object({
-      id: string,
-      name: string,
-      importedAt: string,
-      pages: z.array(z.object({ number: z.number(), text: string })),
-      findings: z.array(findingSchema),
-      facts: z.array(
-        z.object({ id: string, label: string, value: string, source: sourceSchema }),
-      ),
-      coverage: z.array(
-        z.object({ id: string, label: string, found: z.boolean(), guidance: string }),
-      ),
-    }),
-  ),
   equipment: z.array(
     z.object({
       id: string,
@@ -95,9 +144,44 @@ const solarDataSchema = z.object({
       notes: string,
     }),
   ),
+}
+
+const legacySolarDataSchema = z.object({
+  schemaVersion: z.literal(1),
+  ...commonSolarData,
+  reviews: z.array(z.object(reviewBase)),
 })
 
-export const parseBackup = (value: unknown): SolarData => solarDataSchema.parse(value)
+const solarDataSchema = z.object({
+  schemaVersion: z.literal(2),
+  ...commonSolarData,
+  reviews: z.array(z.object({
+    ...reviewBase,
+    deal: dealSchema,
+    dealSources: z.record(z.string(), sourceSchema),
+    packet: z.array(packetSchema),
+  })),
+})
+
+export const parseBackup = (value: unknown): SolarData => {
+  const parsed = z.discriminatedUnion('schemaVersion', [legacySolarDataSchema, solarDataSchema]).parse(value)
+  if (parsed.schemaVersion === 2) return parsed as SolarData
+
+  return {
+    ...parsed,
+    schemaVersion: 2,
+    reviews: parsed.reviews.map((review) => {
+      const { deal, sources } = createDealFromFacts(review.facts)
+      const documentNames = [...new Set(review.pages.map((page) => page.documentName).filter(Boolean))] as string[]
+      return {
+        ...review,
+        deal,
+        dealSources: sources,
+        packet: createPacket(documentNames, deal.ownership),
+      }
+    }),
+  }
+}
 
 export const downloadJsonBackup = (data: SolarData) => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -117,9 +201,11 @@ export const readJsonBackup = async (file: File) => {
   } catch {
     throw new Error('That file is not valid JSON.')
   }
-  const result = solarDataSchema.safeParse(parsed)
-  if (!result.success) throw new Error('That is not a valid Solar Plainly backup.')
-  return result.data
+  try {
+    return parseBackup(parsed)
+  } catch {
+    throw new Error('That is not a valid Solar Plainly backup.')
+  }
 }
 
 export const readDocumentFile = async (

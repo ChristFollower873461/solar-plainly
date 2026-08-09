@@ -47,6 +47,50 @@ const findingRules: FindingRule[] = [
     pattern: /re[- ]?amorti[sz]|payment\s+(?:will|may)\s+increase|voluntary\s+prepayment|step[- ]?up\s+payment/i,
   },
   {
+    id: 'annual-escalator',
+    category: 'Payments',
+    title: 'The price may rise every year',
+    explanation:
+      'Lease and PPA escalators compound. A modest annual percentage can materially change the payment or energy rate later in the term.',
+    question:
+      'Show me the payment or energy rate in years 1, 10, 15, and the final year, including every escalator.',
+    severity: 'important',
+    pattern: /annual\s+escalator|(?:increase|escalat).{0,35}(?:each|every|per)\s+year|[\d.]+%\s+(?:annual|yearly)\s+increase/i,
+  },
+  {
+    id: 'payment-before-operation',
+    category: 'Payments',
+    title: 'Payments may start before the system is operating',
+    explanation:
+      'Loan or lease payments can begin before utility permission to operate, leaving the homeowner with both the payment and a normal utility bill.',
+    question:
+      'What event starts payments, and what happens if inspection, interconnection, or permission to operate is delayed?',
+    severity: 'important',
+    pattern: /(?:payment|loan).{0,45}(?:begin|commence|due).{0,45}(?:before|regardless\s+of).{0,35}(?:permission\s+to\s+operate|\bPTO\b|interconnection|operation)/i,
+  },
+  {
+    id: 'balloon-payment',
+    category: 'Financing',
+    title: 'A balloon payment may be due',
+    explanation:
+      'A balloon or maturity payment can leave a large balance due after the regular payment schedule.',
+    question:
+      'What exact amount is expected at maturity, and show me the balance by year under the stated payment schedule.',
+    severity: 'important',
+    pattern: /balloon\s+payment|maturity\s+payment|remaining\s+balance.{0,35}(?:due|payable)\s+(?:at|upon)\s+maturity/i,
+  },
+  {
+    id: 'prepayment-penalty',
+    category: 'Financing',
+    title: 'Early payoff may carry a charge',
+    explanation:
+      'A prepayment penalty or make-whole charge changes the economics of refinancing, moving, or paying the obligation off early.',
+    question:
+      'Is there any prepayment, early termination, make-whole, or payoff charge in any year of the agreement?',
+    severity: 'important',
+    pattern: /prepayment\s+penalt|early\s+(?:termination|payoff).{0,35}(?:fee|charge|penalt)|make[- ]whole/i,
+  },
+  {
     id: 'security-interest',
     category: 'Home sale',
     title: 'The financing may create a filing or security interest',
@@ -102,6 +146,17 @@ const findingRules: FindingRule[] = [
     pattern: /sale\s+of\s+(?:the\s+)?home|sell\s+(?:the\s+)?(?:home|property)|transfer\s+(?:of\s+)?(?:this\s+)?agreement|buyer\s+credit\s+approval/i,
   },
   {
+    id: 'contract-assignment',
+    category: 'Who performs',
+    title: 'The provider may assign the agreement',
+    explanation:
+      'Assignment can move servicing, payment collection, warranties, or performance duties to another company without changing the homeowner obligation.',
+    question:
+      'Which duties may be assigned, must I receive notice, and who remains responsible for installation and warranty work?',
+    severity: 'review',
+    pattern: /assign(?:ment|ed)?.{0,45}(?:agreement|contract|rights|obligations)|successors?\s+and\s+assigns/i,
+  },
+  {
     id: 'savings-disclaimer',
     category: 'Production',
     title: 'Savings or production may be an estimate, not a promise',
@@ -122,6 +177,17 @@ const findingRules: FindingRule[] = [
       'For each warranty, who pays diagnosis, labor, shipping, removal, reinstallation, and roof access?',
     severity: 'review',
     pattern: /(?:labor|shipping|removal|reinstallation|service\s+call).{0,40}(?:excluded|not\s+covered|customer\s+responsib)/i,
+  },
+  {
+    id: 'roof-removal-cost',
+    category: 'Roof',
+    title: 'Future roof work may require paid removal and reinstallation',
+    explanation:
+      'A roof repair or replacement can require the array to be removed and reinstalled, and that work may sit outside both roof and equipment warranties.',
+    question:
+      'Who performs and pays for panel removal, storage, and reinstallation if the roof needs work during the contract term?',
+    severity: 'review',
+    pattern: /remove\s+and\s+reinstall|removal.{0,35}reinstallation|roof.{0,55}(?:customer\s+responsib|additional\s+(?:fee|cost|charge))/i,
   },
   {
     id: 'access-rights',
@@ -161,6 +227,24 @@ const coverageRules: CoverageRule[] = [
     pattern: /\bAPR\b|annual\s+percentage\s+rate|loan\s+term|payment\s+schedule/i,
   },
   {
+    id: 'credit-total',
+    label: 'Finance charge and total of payments',
+    guidance: 'Ask for the all-in dollars paid under the complete schedule, not only the interest rate.',
+    pattern: /finance\s+charge|total\s+of\s+payments|amount\s+financed/i,
+  },
+  {
+    id: 'payment-change',
+    label: 'Payment changes, prepayments, and escalators',
+    guidance: 'Write down every event or annual percentage that changes the payment or energy rate.',
+    pattern: /re[- ]?amorti[sz]|pre[- ]?payment|annual\s+escalator|payment.{0,30}(?:increase|change)/i,
+  },
+  {
+    id: 'parties',
+    label: 'Installer, contractor license, lender, and servicer',
+    guidance: 'Identify which company owns each promise and who receives payments or service requests.',
+    pattern: /contractor\s+license|license\s+(?:number|no\.)|lender|loan\s+servicer|solar\s+provider/i,
+  },
+  {
     id: 'ownership',
     label: 'Who owns the system and incentives',
     guidance: 'Ownership determines incentives, transfer steps, and many service obligations.',
@@ -183,6 +267,12 @@ const coverageRules: CoverageRule[] = [
     label: 'Product, performance, labor, and roof warranties',
     guidance: 'A 25-year headline may cover only one component or type of failure.',
     pattern: /warrant(?:y|ies)|workmanship|roof\s+penetration/i,
+  },
+  {
+    id: 'service',
+    label: 'Service response and warranty claim process',
+    guidance: 'Confirm who diagnoses problems, response times, claim steps, and uncovered labor costs.',
+    pattern: /service\s+(?:request|response|department)|warranty\s+claim|repair\s+request|diagnostic/i,
   },
   {
     id: 'cancel',
@@ -233,6 +323,7 @@ const sourceFor = (pages: ContractPage[], pattern: RegExp) => {
       return {
         page: page.number,
         excerpt: excerptAround(flat, match.index, match[0].length),
+        documentName: page.documentName,
       }
     }
   }
@@ -260,6 +351,24 @@ const factRules: FactRule[] = [
     value: (match) => `$${match[1]}`,
   },
   {
+    id: 'finance-charge',
+    label: 'Possible finance charge',
+    pattern: /finance\s+charge(?:\s+is|\s+of|:)?\s*\$?([\d,]+(?:\.\d{2})?)/i,
+    value: (match) => `$${match[1]}`,
+  },
+  {
+    id: 'total-of-payments',
+    label: 'Possible total of payments',
+    pattern: /total\s+of\s+payments(?:\s+is|\s+of|:)?\s*\$?([\d,]+(?:\.\d{2})?)/i,
+    value: (match) => `$${match[1]}`,
+  },
+  {
+    id: 'down-payment',
+    label: 'Possible down payment',
+    pattern: /no\s+down\s+payment|down\s+payment(?:\s+is|\s+of|:)?\s*\$?([\d,]+(?:\.\d{2})?)/i,
+    value: (match) => match[1] ? `$${match[1]}` : '$0',
+  },
+  {
     id: 'apr',
     label: 'Possible APR',
     pattern: /(?:at\s+)?([\d.]+)%\s*(?:APR|annual\s+percentage\s+rate)|(?:APR|annual\s+percentage\s+rate)(?:\s+is|:)?\s*([\d.]+)%/i,
@@ -270,6 +379,42 @@ const factRules: FactRule[] = [
     label: 'Possible financing term',
     pattern: /(?:loan\s+)?term(?:\s+is|\s+of|:)?\s*(\d{1,2})\s*years?|(?:loan|financing).{0,30}(\d{1,2})[- ]year/i,
     value: (match) => `${match[1] ?? match[2]} years`,
+  },
+  {
+    id: 'monthly-payment',
+    label: 'Possible starting payment',
+    pattern: /(?:starting|initial|first).{0,24}monthly\s+payment(?:\s+is|\s+of|:)?\s*\$?([\d,]+(?:\.\d{2})?)|monthly\s+payment(?:\s+is|:)?\s*\$?([\d,]+(?:\.\d{2})?)/i,
+    value: (match) => `$${match[1] ?? match[2]}`,
+  },
+  {
+    id: 'later-monthly-payment',
+    label: 'Possible later payment',
+    pattern: /monthly\s+payment.{0,28}increase(?:s|d)?\s+to\s+\$?([\d,]+(?:\.\d{2})?)|payment.{0,28}(?:changes?|resets?)\s+to\s+\$?([\d,]+(?:\.\d{2})?)/i,
+    value: (match) => `$${match[1] ?? match[2]}`,
+  },
+  {
+    id: 'payment-change-month',
+    label: 'Possible payment-change month',
+    pattern: /(?:beginning|starting)\s+(?:in\s+)?month\s+(\d{1,3})|(?:after|within)\s+(\d{1,3})\s+months?/i,
+    value: (match) => `Month ${match[1] ?? Number(match[2]) + 1}`,
+  },
+  {
+    id: 'expected-prepayment',
+    label: 'Possible expected prepayment',
+    pattern: /(?:voluntary\s+|expected\s+|anticipated\s+)?pre[- ]?payment(?:\s+of|\s+is|:)?\s*\$?([\d,]+(?:\.\d{2})?)/i,
+    value: (match) => `$${match[1]}`,
+  },
+  {
+    id: 'ppa-rate',
+    label: 'Possible starting energy rate',
+    pattern: /\$?([\d.]+)\s*(?:per|\/)\s*kWh|(?:energy|ppa)\s+rate(?:\s+is|:)?\s*\$?([\d.]+)/i,
+    value: (match) => `$${match[1] ?? match[2]}/kWh`,
+  },
+  {
+    id: 'escalator',
+    label: 'Possible annual escalator',
+    pattern: /([\d.]+)%\s+(?:annual|yearly).{0,24}(?:escalator|increase)|(?:annual\s+)?escalator.{0,24}([\d.]+)%/i,
+    value: (match) => `${match[1] ?? match[2]}%`,
   },
   {
     id: 'system-size',
@@ -299,6 +444,7 @@ const extractFacts = (pages: ContractPage[]): ContractFact[] => {
           source: {
             page: page.number,
             excerpt: excerptAround(flat, match.index, match[0].length),
+            documentName: page.documentName,
           },
         })
         break

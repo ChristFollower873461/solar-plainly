@@ -1,10 +1,11 @@
 import { openDB, type DBSchema } from 'idb'
+import { parseBackup } from './backup'
 import type { SolarData } from '../types'
 
 interface SolarPlainlyDb extends DBSchema {
   app: {
     key: 'solar-data'
-    value: SolarData
+    value: unknown
   }
 }
 
@@ -16,7 +17,8 @@ const database = openDB<SolarPlainlyDb>('solar-plainly', 1, {
 
 export const loadSolarData = async () => {
   const db = await database
-  return db.get('app', 'solar-data')
+  const stored = await db.get('app', 'solar-data')
+  return stored ? parseBackup(stored) : undefined
 }
 
 export const saveSolarData = async (data: SolarData) => {

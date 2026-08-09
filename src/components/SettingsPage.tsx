@@ -80,7 +80,7 @@ export function SettingsPage({ data, onReplace, onReset }: SettingsPageProps) {
           </div>
           <div className="setting-row">
             <Upload size={21} />
-            <div><h3>Import backup</h3><p>Replace this browser's record with a Solar Plainly version 1 backup.</p></div>
+            <div><h3>Import backup</h3><p>Replace this browser's record with a Solar Plainly version 1 or 2 backup.</p></div>
             <button className="secondary-button" onClick={() => importRef.current?.click()} type="button"><Upload size={17} /> Import</button>
             <input accept="application/json,.json" hidden onChange={(event) => void importBackup(event.target.files?.[0])} ref={importRef} type="file" />
           </div>
@@ -129,7 +129,7 @@ export function SettingsPage({ data, onReplace, onReset }: SettingsPageProps) {
       </section>
 
       <footer className="app-footer">
-        <span>Solar Plainly v0.1.0</span>
+        <span>Solar Plainly v0.2.0</span>
         <span>Educational software</span>
         <span>Last saved {new Date(data.updatedAt).toLocaleString()}</span>
       </footer>

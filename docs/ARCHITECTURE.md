@@ -14,20 +14,23 @@
 Solar Plainly is a static React and TypeScript PWA built with Vite.
 
 ```text
-PDF or TXT file
-      |
-      v
-Browser-only PDF text extraction
-      |
-      v
-Deterministic pattern rules
-      |
-      +--> possible terms
-      +--> page-linked questions
-      +--> topic coverage
-      |
-      v
-React state --> IndexedDB --> JSON backup
+PDF or TXT packet (up to 8 documents)
+             |
+             v
+Browser-only text extraction with document/page provenance
+             |
+             v
+Deterministic rules and structured term extraction
+             |
+             +--> editable deal facts and source labels
+             +--> inspectable financial arithmetic
+             +--> page-linked questions and notes
+             +--> packet-completeness checklist
+             |
+             +--> printable homeowner brief
+             +--> system-record handoff
+             v
+React state --> IndexedDB --> versioned JSON backup
 ```
 
 There is no application server, account system, database service, analytics endpoint, LLM call, or background queue.
@@ -36,7 +39,7 @@ There is no application server, account system, database service, analytics endp
 
 ### Contract ingestion
 
-`src/lib/pdf.ts` accepts PDF or plain text, enforces size and page limits, and extracts one text record per page. It rejects PDFs with too little searchable text instead of pretending a scanned document was analyzed.
+`src/lib/pdf.ts` accepts PDF or plain text, enforces per-file size and page limits, and extracts one text record per page. `ContractReview` keeps the originating document name, limits a packet to eight files, 40 MB total, and 250 extracted pages, and reports partial failures. It rejects PDFs with too little searchable text instead of pretending a scanned document was analyzed.
 
 ### Contract review
 
@@ -50,11 +53,25 @@ There is no application server, account system, database service, analytics endp
 
 Coverage rules separately state whether familiar language was located. Missing coverage never proves absence.
 
+### Deal workspace
+
+`src/lib/deal.ts` maps extracted facts into an editable ownership-specific term set, infers packet status from document names, and calculates transparent comparisons such as:
+
+- financed amount minus cash price and the corresponding percentage;
+- cash and financed cost per watt;
+- standard amortized payment and total for a conventional fixed-rate loan;
+- the stated payment jump and scheduled outlay if an expected lump-sum prepayment is not made;
+- combined solar and remaining utility payments for year 1 and year 10 when the user supplies those assumptions.
+
+Calculations preserve their inputs in the interface and do not produce a contract score, savings guarantee, tax result, or lender payoff quote. A financing difference is explicitly not labeled a dealer fee.
+
+`src/components/PacketChecklist.tsx` tracks eight common document categories independently from rule coverage. `src/components/ReviewReport.tsx` turns the saved numbers, questions, sources, notes, and packet gaps into a print-only homeowner brief.
+
 ### State and persistence
 
 `src/hooks/useSolarData.ts` owns the in-memory record and saves changes to IndexedDB after a short debounce. `src/lib/storage.ts` contains the only persistent browser-store access.
 
-The application schema is versioned with `schemaVersion: 1`.
+The application schema is versioned with `schemaVersion: 2`. Existing version 1 IndexedDB records and backups are migrated on read with empty deal and packet structures, so the release does not strand earlier local data.
 
 ### Backup and local documents
 
@@ -62,13 +79,14 @@ The application schema is versioned with `schemaVersion: 1`.
 
 Limits:
 
-- contract analysis: 15 MB, 150 pages;
+- individual contract file: 15 MB, 150 pages;
+- complete review packet: 8 files, 40 MB, 250 extracted pages;
 - saved document: 10 MB;
 - imported backup: 60 MB.
 
 ### Production history
 
-`src/lib/production.ts` compares the latest 12 entries with the previous 12 only after 24 entries exist. It performs arithmetic, not weather normalization or equipment diagnosis.
+`src/lib/production.ts` compares the latest 12 entries with the previous 12 only after 24 entries exist. `src/lib/productionImport.ts` uses a CSV parser to recognize common date/month and energy columns, normalize Wh, kWh, or MWh, aggregate daily rows by month, and preview replacements before saving. CSV files are limited to 5 MB. These modules perform arithmetic, not weather normalization or equipment diagnosis.
 
 ### Offline behavior
 
@@ -85,6 +103,7 @@ Trusted:
 Untrusted:
 
 - PDF contents;
+- CSV contents;
 - backup files;
 - free-form text and URLs;
 - external resource sites.
