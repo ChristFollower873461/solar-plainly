@@ -1550,6 +1550,36 @@ summary:focus-visible {
   color: var(--muted);
 }
 
+.research-band {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 22px 2px;
+}
+
+.research-band > svg {
+  color: var(--blue);
+}
+
+.research-band h2 {
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
+.research-band p:last-child {
+  font-size: 0.72rem;
+  margin-top: 4px;
+  max-width: 760px;
+}
+
+.research-band .secondary-button {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 .open-source-band {
   align-items: center;
   background: #173f2b;
@@ -2709,6 +2739,16 @@ summary:focus-visible {
 
   .open-source-band {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .research-band {
+    align-items: flex-start;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .research-band .secondary-button {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 
   .open-source-band .secondary-button {

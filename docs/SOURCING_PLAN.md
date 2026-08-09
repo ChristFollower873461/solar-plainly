@@ -137,6 +137,10 @@ Recruit through two channels in parallel:
    supplement partner recruitment because rare states, financing types, and
    distressed-system owners may not appear in a general panel naturally.
 
+The live screener, direct-consumer channel rules, outreach copy, geographic
+targeting method, campaign log, and first-wave budget are maintained in the
+[consumer recruitment playbook](CONSUMER_RECRUITMENT.md).
+
 Minimum quotas for the 60-packet credible-beta corpus:
 
 | Dimension | Minimum target |

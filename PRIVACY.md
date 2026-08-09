@@ -22,6 +22,14 @@ The project does not operate analytics, advertising, lead-sale, account, documen
 
 External resources are contacted only after the user opens an external link. Hosting providers may receive ordinary web request information when the static application files are loaded.
 
+## Optional Research Screener
+
+The Settings screen and project README link to a separate Google Forms homeowner research screener. Opening that link leaves Solar Plainly. If a person chooses to submit it, Google and the AIssisted Consulting Workspace account receive the answers entered in the form.
+
+The screener asks about the person's solar situation, state, agreement timing, payment type, document availability, language, research interest, name, and email. It does not request an exact address, contract, utility or lender account, payment information, or files. No local Solar Plainly record or document is attached or transmitted to the screener.
+
+Any later request for a redacted document requires separate consent and a separate transfer process. Research participation is optional and is not required to use the app.
+
 ## User Controls
 
 The user can:
