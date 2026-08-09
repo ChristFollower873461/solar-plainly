@@ -1,16 +1,18 @@
 import {
   ArrowRight,
-  CheckCircle2,
   FileSearch,
+  Files,
   Gauge,
   ShieldCheck,
   Wrench,
 } from 'lucide-react'
-import type { AppView, SolarData } from '../types'
+import { missingDealTerms } from '../lib/deal'
+import type { AppView, ReviewTab, SolarData } from '../types'
 
 interface DashboardProps {
   data: SolarData
   onNavigate: (view: AppView) => void
+  onOpenReview: (tab: ReviewTab) => void
 }
 
 const formatDate = (date: string) =>
@@ -18,9 +20,12 @@ const formatDate = (date: string) =>
     new Date(`${date}T12:00:00`),
   )
 
-export function Dashboard({ data, onNavigate }: DashboardProps) {
+export function Dashboard({ data, onNavigate, onOpenReview }: DashboardProps) {
   const latestReview = data.reviews[0]
   const openFindings = latestReview?.findings.filter((finding) => finding.status === 'open').length ?? 0
+  const importantFindings = latestReview?.findings.filter((finding) => finding.status === 'open' && finding.severity === 'important').length ?? 0
+  const missingTerms = latestReview ? missingDealTerms(latestReview.deal).length : 0
+  const packetGaps = latestReview?.packet.filter((item) => item.status === 'missing' || item.status === 'unknown').length ?? 0
   const nextTask = [...data.tasks]
     .filter((task) => !task.completedAt)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0]
@@ -41,25 +46,43 @@ export function Dashboard({ data, onNavigate }: DashboardProps) {
         title: 'Check the agreement in front of you',
         detail: 'Upload a PDF or paste the text. The file never leaves this browser.',
         label: 'Check a contract',
-        view: 'check' as const,
+        action: () => onOpenReview('overview'),
         icon: FileSearch,
       }
-    : openFindings > 0
+    : missingTerms > 0
       ? {
-          eyebrow: `${openFindings} open ${openFindings === 1 ? 'question' : 'questions'}`,
-          title: 'Finish your contract review',
-          detail: 'Resolve each question with the installer, lender, or an independent professional.',
-          label: 'Open review',
-          view: 'check' as const,
+          eyebrow: `${missingTerms} missing deal ${missingTerms === 1 ? 'number' : 'numbers'}`,
+          title: 'Make the offer comparable',
+          detail: 'Capture the cash price, complete financing, payment changes, system size, and production assumptions.',
+          label: 'Open deal desk',
+          action: () => onOpenReview('overview'),
+          icon: Gauge,
+        }
+      : openFindings > 0
+      ? {
+          eyebrow: `${importantFindings} high-stakes / ${openFindings} total`,
+          title: 'Take the unresolved terms back',
+          detail: 'Get written answers from the installer, lender, or an independent professional.',
+          label: 'Open questions',
+          action: () => onOpenReview('questions'),
           icon: FileSearch,
         }
+      : packetGaps > 0
+        ? {
+            eyebrow: `${packetGaps} unconfirmed packet ${packetGaps === 1 ? 'item' : 'items'}`,
+            title: 'Make sure the paperwork is complete',
+            detail: 'A proposal, installation contract, financing agreement, and disclosure can contain different promises.',
+            label: 'Check the packet',
+            action: () => onOpenReview('packet'),
+            icon: Files,
+          }
       : recordPercent < 75
         ? {
             eyebrow: 'After installation',
             title: 'Complete the system record',
             detail: 'Keep the equipment, warranty, utility, and installer details together.',
             label: 'Build the record',
-            view: 'record' as const,
+            action: () => onNavigate('record'),
             icon: ShieldCheck,
           }
         : {
@@ -67,7 +90,7 @@ export function Dashboard({ data, onNavigate }: DashboardProps) {
             title: nextTask?.title ?? 'Add the next maintenance check',
             detail: 'Small, documented checks make warranty claims and troubleshooting easier.',
             label: 'Open care list',
-            view: 'care' as const,
+            action: () => onNavigate('care'),
             icon: Wrench,
           }
 
@@ -101,7 +124,7 @@ export function Dashboard({ data, onNavigate }: DashboardProps) {
           <h2 id="next-action-title">{nextAction.title}</h2>
           <p>{nextAction.detail}</p>
         </div>
-        <button className="primary-button" onClick={() => onNavigate(nextAction.view)} type="button">
+        <button className="primary-button" onClick={nextAction.action} type="button">
           {nextAction.label}
           <ArrowRight size={17} />
         </button>
@@ -115,23 +138,23 @@ export function Dashboard({ data, onNavigate }: DashboardProps) {
           </div>
         </div>
         <div className="summary-grid">
-          <button className="summary-panel" onClick={() => onNavigate('check')} type="button">
+          <button className="summary-panel" onClick={() => onOpenReview('overview')} type="button">
+            <Gauge size={21} />
+            <span className="summary-value">{latestReview ? missingTerms : '-'}</span>
+            <strong>Deal numbers missing</strong>
+            <small>{latestReview ? 'Before this offer can be compared' : 'No contract packet reviewed'}</small>
+          </button>
+          <button className="summary-panel" onClick={() => onOpenReview('questions')} type="button">
             <FileSearch size={21} />
             <span className="summary-value">{latestReview ? openFindings : '-'}</span>
-            <strong>Contract questions</strong>
-            <small>{latestReview?.name ?? 'No contract checked yet'}</small>
+            <strong>Unresolved contract questions</strong>
+            <small>{latestReview ? `${importantFindings} need an answer` : 'Sources stay linked to each question'}</small>
           </button>
-          <button className="summary-panel" onClick={() => onNavigate('record')} type="button">
-            <Gauge size={21} />
-            <span className="summary-value">{recordPercent}%</span>
-            <strong>Record complete</strong>
-            <small>{data.equipment.length} equipment / {data.documents.length} documents</small>
-          </button>
-          <button className="summary-panel" onClick={() => onNavigate('care')} type="button">
-            <CheckCircle2 size={21} />
-            <span className="summary-value">{data.tasks.filter((task) => !task.completedAt).length}</span>
-            <strong>Open care tasks</strong>
-            <small>{nextTask ? `Next due ${formatDate(nextTask.dueDate)}` : 'Nothing due'}</small>
+          <button className="summary-panel" onClick={() => onOpenReview('packet')} type="button">
+            <Files size={21} />
+            <span className="summary-value">{latestReview ? packetGaps : '-'}</span>
+            <strong>Packet items unconfirmed</strong>
+            <small>{latestReview?.name ?? 'Installation, financing, disclosure, warranties'}</small>
           </button>
         </div>
       </section>
@@ -146,8 +169,8 @@ export function Dashboard({ data, onNavigate }: DashboardProps) {
           <p>Findings point back to the page and wording that triggered them.</p>
         </div>
         <div>
-          <strong>Your record, your file</strong>
-          <p>Export a portable backup at any time and erase the browser copy in one place.</p>
+          <strong>Arithmetic you can inspect</strong>
+          <p>Every comparison shows its inputs and limits instead of hiding behind a savings score.</p>
         </div>
       </section>
     </div>

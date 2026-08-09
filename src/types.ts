@@ -1,4 +1,5 @@
 export type AppView = 'home' | 'check' | 'record' | 'care' | 'settings'
+export type ReviewTab = 'overview' | 'questions' | 'packet'
 
 export type OwnershipType = 'cash' | 'loan' | 'lease' | 'ppa' | 'unknown'
 
@@ -9,11 +10,13 @@ export type FindingStatus = 'open' | 'resolved'
 export interface ContractPage {
   number: number
   text: string
+  documentName?: string
 }
 
 export interface FindingSource {
   page: number
   excerpt: string
+  documentName?: string
 }
 
 export interface ContractFinding {
@@ -42,6 +45,50 @@ export interface CoverageItem {
   guidance: string
 }
 
+export interface DealTerms {
+  ownership: OwnershipType
+  cashPrice: string
+  financedAmount: string
+  financeCharge: string
+  totalOfPayments: string
+  downPayment: string
+  aprPercent: string
+  termYears: string
+  monthlyPayment: string
+  laterMonthlyPayment: string
+  paymentChangeMonth: string
+  expectedPrepayment: string
+  ppaRate: string
+  annualEscalatorPercent: string
+  systemSizeKw: string
+  annualProductionKwh: string
+  currentUtilityBill: string
+  remainingUtilityBill: string
+  utilityEscalatorPercent: string
+  installer: string
+  lender: string
+}
+
+export type DealSources = Partial<Record<keyof DealTerms, FindingSource>>
+
+export type PacketKey =
+  | 'installation-contract'
+  | 'financing-agreement'
+  | 'solar-disclosure'
+  | 'proposal-production'
+  | 'equipment-spec'
+  | 'warranties'
+  | 'cancellation-form'
+  | 'utility-interconnection'
+
+export type PacketStatus = 'present' | 'missing' | 'unknown' | 'not-applicable'
+
+export interface PacketItem {
+  key: PacketKey
+  status: PacketStatus
+  note: string
+}
+
 export interface ContractReview {
   id: string
   name: string
@@ -50,6 +97,9 @@ export interface ContractReview {
   findings: ContractFinding[]
   facts: ContractFact[]
   coverage: CoverageItem[]
+  deal: DealTerms
+  dealSources: DealSources
+  packet: PacketItem[]
 }
 
 export interface SystemProfile {
@@ -134,7 +184,7 @@ export interface SystemIssue {
 }
 
 export interface SolarData {
-  schemaVersion: 1
+  schemaVersion: 2
   updatedAt: string
   profile: SystemProfile
   reviews: ContractReview[]

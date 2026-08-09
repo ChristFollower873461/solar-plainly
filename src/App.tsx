@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 import { AppShell } from './components/AppShell'
 import { Dashboard } from './components/Dashboard'
 import { useSolarData } from './hooks/useSolarData'
-import type { AppView } from './types'
+import type { AppView, ReviewTab } from './types'
 
 const ContractReview = lazy(() =>
   import('./components/ContractReview').then((module) => ({ default: module.ContractReview })),
@@ -19,7 +19,18 @@ const SettingsPage = lazy(() =>
 
 function App() {
   const [view, setView] = useState<AppView>('home')
+  const [reviewTab, setReviewTab] = useState<ReviewTab>('overview')
   const { data, ready, saveState, update, replace, reset } = useSolarData()
+
+  const navigate = (nextView: AppView) => {
+    if (nextView === 'check') setReviewTab('overview')
+    setView(nextView)
+  }
+
+  const openReview = (tab: ReviewTab) => {
+    setReviewTab(tab)
+    setView('check')
+  }
 
   if (!ready) {
     return (
@@ -32,10 +43,10 @@ function App() {
   }
 
   return (
-    <AppShell onViewChange={setView} saveState={saveState} view={view}>
+    <AppShell onViewChange={navigate} saveState={saveState} view={view}>
       <Suspense fallback={<div className="view-loading">Opening...</div>}>
-        {view === 'home' && <Dashboard data={data} onNavigate={setView} />}
-        {view === 'check' && <ContractReview data={data} update={update} />}
+        {view === 'home' && <Dashboard data={data} onNavigate={navigate} onOpenReview={openReview} />}
+        {view === 'check' && <ContractReview data={data} initialTab={reviewTab} onNavigate={navigate} update={update} />}
         {view === 'record' && <SystemPassport data={data} update={update} />}
         {view === 'care' && <Care data={data} update={update} />}
         {view === 'settings' && <SettingsPage data={data} onReplace={replace} onReset={reset} />}

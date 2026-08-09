@@ -4,6 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || '/',
+  optimizeDeps: {
+    include: ['papaparse'],
+  },
   plugins: [
     react(),
     VitePWA({
@@ -13,7 +16,7 @@ export default defineConfig({
         name: 'Solar Plainly',
         short_name: 'Solar Plainly',
         description:
-          'Check a solar contract, keep a system record, and stay ahead of maintenance.',
+          'Review a solar deal, keep a system record, and stay ahead of maintenance.',
         theme_color: '#0b7443',
         background_color: '#f7f9f7',
         display: 'standalone',

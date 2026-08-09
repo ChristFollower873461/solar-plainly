@@ -4,11 +4,14 @@ import {
   Check,
   CircleDot,
   ClipboardPlus,
+  FileSpreadsheet,
   Plus,
   Trash2,
   TrendingDown,
+  Upload,
+  X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -19,8 +22,10 @@ import {
   YAxis,
 } from 'recharts'
 import { calculateAnnualComparison, nextDueDate } from '../lib/production'
+import { readProductionCsv } from '../lib/productionImport'
 import type {
   IssueStatus,
+  ProductionEntry,
   SolarData,
   TaskFrequency,
   UpdateSolarData,
@@ -47,6 +52,10 @@ export function Care({ data, update }: CareProps) {
   const [issueTitle, setIssueTitle] = useState('')
   const [issueContact, setIssueContact] = useState('')
   const [issueNotes, setIssueNotes] = useState('')
+  const [importPreview, setImportPreview] = useState<ProductionEntry[]>([])
+  const [importName, setImportName] = useState('')
+  const [importError, setImportError] = useState('')
+  const importRef = useRef<HTMLInputElement>(null)
 
   const tasks = useMemo(
     () => [...data.tasks].sort((a, b) => {
@@ -119,6 +128,34 @@ export function Care({ data, update }: CareProps) {
     setIssueTitle('')
     setIssueContact('')
     setIssueNotes('')
+  }
+
+  const previewProductionCsv = async (file?: File) => {
+    if (!file) return
+    setImportError('')
+    try {
+      setImportPreview(await readProductionCsv(file))
+      setImportName(file.name)
+    } catch (caught) {
+      setImportPreview([])
+      setImportName('')
+      setImportError(caught instanceof Error ? caught.message : 'The production CSV could not be read.')
+    } finally {
+      if (importRef.current) importRef.current.value = ''
+    }
+  }
+
+  const confirmProductionImport = () => {
+    if (!importPreview.length) return
+    const importedMonths = new Set(importPreview.map((entry) => entry.month))
+    update((draft) => {
+      draft.production = [
+        ...draft.production.filter((entry) => !importedMonths.has(entry.month)),
+        ...importPreview,
+      ]
+    })
+    setImportPreview([])
+    setImportName('')
   }
 
   return (
@@ -197,7 +234,25 @@ export function Care({ data, update }: CareProps) {
               <p className="eyebrow">Monthly log</p>
               <h2 id="production-title">Production</h2>
             </div>
+            <div className="production-import-action">
+              <button className="secondary-button" onClick={() => importRef.current?.click()} type="button"><Upload size={17} /> Import CSV</button>
+              <input accept="text/csv,.csv" hidden onChange={(event) => void previewProductionCsv(event.target.files?.[0])} ref={importRef} type="file" />
+            </div>
           </div>
+
+          {importPreview.length > 0 && (
+            <div className="production-import-preview">
+              <FileSpreadsheet size={24} />
+              <div>
+                <strong>{importPreview.length} months ready from {importName}</strong>
+                <p>{importPreview[0].month} through {importPreview.at(-1)?.month} / {importPreview.filter((entry) => data.production.some((current) => current.month === entry.month)).length} existing months will be replaced</p>
+              </div>
+              <button aria-label="Cancel CSV import" className="icon-button" onClick={() => { setImportPreview([]); setImportName('') }} title="Cancel import" type="button"><X size={17} /></button>
+              <button className="primary-button" onClick={confirmProductionImport} type="button"><Check size={17} /> Import months</button>
+            </div>
+          )}
+
+          {importError && <div className="inline-alert error" role="alert"><AlertTriangle size={18} />{importError}</div>}
 
           {comparison && comparison.changePercent <= -10 && (
             <div className="inline-alert warning">
