@@ -9,6 +9,7 @@ import {
   RotateCcw,
   ShieldCheck,
   Upload,
+  UsersRound,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { downloadJsonBackup, readJsonBackup } from '../lib/backup'
@@ -20,6 +21,9 @@ interface SettingsPageProps {
   onReplace: (data: SolarData) => void
   onReset: () => Promise<void>
 }
+
+const researchFormUrl =
+  'https://docs.google.com/forms/d/e/1FAIpQLScve57k2bzR-jpbbjM_sbXVQz2EhGf6ktsiR2VcYul788cK5g/viewform'
 
 const approximateSize = (data: SolarData) => {
   const bytes = new Blob([JSON.stringify(data)]).size
@@ -120,6 +124,16 @@ export function SettingsPage({ data, onReplace, onReset }: SettingsPageProps) {
           <a href="https://consumer.ftc.gov/consumer-alerts/2024/09/solar-energy-rising-popularity-so-are-scams" rel="noreferrer" target="_blank"><span>Federal Trade Commission</span><strong>Solar scams and contract pressure</strong><ExternalLink size={17} /></a>
           <a href="https://www.irs.gov/credits-deductions/residential-clean-energy-credit" rel="noreferrer" target="_blank"><span>Internal Revenue Service</span><strong>Current residential clean-energy credit guidance</strong><ExternalLink size={17} /></a>
         </div>
+      </section>
+
+      <section className="research-band" aria-labelledby="research-title">
+        <UsersRound size={24} aria-hidden="true" />
+        <div>
+          <p className="eyebrow">Homeowner research</p>
+          <h2 id="research-title">Help test Solar Plainly with a real solar situation</h2>
+          <p>The three-minute screener asks for no exact address, account number, payment information, or contract. Selected volunteers may be invited to a compensated remote session.</p>
+        </div>
+        <a className="secondary-button" href={researchFormUrl} rel="noreferrer" target="_blank">Join research <ExternalLink size={16} /></a>
       </section>
 
       <section className="open-source-band">

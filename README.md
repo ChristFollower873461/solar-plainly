@@ -24,6 +24,10 @@ Solar proposals mix construction, lending, tax assumptions, utility approvals, e
 
 After installation, the paperwork and operating history often fragment across an installer, lender, utility, manufacturer, monitoring portal, and homeowner inbox. Solar Plainly keeps the homeowner's copy coherent without becoming another lead seller or cloud account.
 
+## Homeowner research
+
+Solar shoppers and owners can volunteer for the current product study through the [three-minute homeowner screener](https://docs.google.com/forms/d/e/1FAIpQLScve57k2bzR-jpbbjM_sbXVQz2EhGf6ktsiR2VcYul788cK5g/viewform). The screener does not request a contract, exact address, account number, or payment information. Selected volunteers may be invited to a compensated remote session; any later document contribution requires separate consent and redaction.
+
 ## Privacy model
 
 - No login or server database.
@@ -86,7 +90,10 @@ tests/e2e/               Desktop and mobile browser journeys
 - This is educational software, not legal, tax, financial, engineering, or warranty advice.
 - Tax and consumer-protection rules change. The app links to current primary sources rather than treating old percentages or deadlines as permanent.
 
-Read [the product brief](docs/PRODUCT_BRIEF.md), [research record](docs/RESEARCH.md), [architecture](docs/ARCHITECTURE.md), and [security policy](SECURITY.md).
+Read [the product brief](docs/PRODUCT_BRIEF.md), [research record](docs/RESEARCH.md),
+[evidence and validation sourcing plan](docs/SOURCING_PLAN.md),
+[consumer recruitment playbook](docs/CONSUMER_RECRUITMENT.md),
+[architecture](docs/ARCHITECTURE.md), and [security policy](SECURITY.md).
 
 ## Contributing
 

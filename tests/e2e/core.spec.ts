@@ -179,6 +179,23 @@ test('saves a system record across reloads', async ({ page }) => {
   await expect(page.getByLabel('System size (kW DC)')).toHaveValue('8.4')
 })
 
+test('keeps optional homeowner research separate from local contract storage', async ({ page, isMobile }) => {
+  if (isMobile) {
+    await page.getByRole('button', { name: 'Open settings' }).click()
+  } else {
+    await page.getByRole('button', { name: 'Settings', exact: true }).click()
+  }
+
+  const researchLink = page.getByRole('link', { name: /join research/i })
+  await expect(page.getByRole('heading', { name: /help test solar plainly/i })).toBeVisible()
+  await expect(page.getByText(/asks for no exact address, account number/i)).toBeVisible()
+  await expect(researchLink).toHaveAttribute(
+    'href',
+    'https://docs.google.com/forms/d/e/1FAIpQLScve57k2bzR-jpbbjM_sbXVQz2EhGf6ktsiR2VcYul788cK5g/viewform',
+  )
+  await expect(researchLink).toHaveAttribute('target', '_blank')
+})
+
 test('mobile navigation stays usable', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'Mobile layout check')
   const mobileNavigation = page.locator('.mobile-nav')
