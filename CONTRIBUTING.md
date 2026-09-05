@@ -16,7 +16,7 @@ Solar Plainly is independent educational software. Do not contribute private con
 ## Development
 
 ```bash
-npm install
+npm ci
 npx playwright install chromium
 npm run dev
 ```

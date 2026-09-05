@@ -41,10 +41,10 @@ Browser storage is not a backup. Export after important changes.
 
 ## Run locally
 
-Requirements: Node.js 22 or newer and npm.
+Requirements: Node.js 22.22.2+ (22.x), 24.15.0+ (24.x), or 26+, and npm. CI runs Node.js 22.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
