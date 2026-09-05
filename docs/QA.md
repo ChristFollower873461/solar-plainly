@@ -14,8 +14,10 @@ On Node 22.23.1 and npm 10.9.8, the clean install, `npm run check` (lint,
 passed. The audit reported zero vulnerabilities. CI now runs the audit for all
 dependencies alongside the existing check and Chromium journey suite.
 
-The PR's CI run is required for the current `npm run test:e2e` result; the
-historical browser and field-research limitations below still apply.
+[CI on the implementation commit](https://github.com/ChristFollower873461/solar-plainly/actions/runs/33963831270)
+also passed the clean install, audit and `npm run check`, followed by
+`npm run test:e2e`: 21 Chromium runs passed with 3 intentional project-specific
+skips. The historical browser and field-research limitations below still apply.
 
 ## Earlier release evidence
 
