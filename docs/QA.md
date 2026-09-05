@@ -1,5 +1,24 @@
 # Release QA
 
+## Setup and dependency maintenance — September 5, 2026
+
+The README now states the Node versions accepted by the locked development
+dependencies. Both setup guides use `npm ci`. The lock advances only the
+development dependency `fast-uri` from 3.1.5 to 3.1.7, which is beyond the
+[upstream patched minimum of 3.1.6](https://github.com/advisories/GHSA-f65p-4m7j-42xc).
+It is brought in by the PWA build tool through Workbox and Ajv. This was a
+dependency advisory finding; no application exploit was demonstrated.
+
+On Node 22.23.1 and npm 10.9.8, the clean install, `npm run check` (lint,
+22 unit tests, TypeScript and production build), and `npm audit --audit-level=high`
+passed. The audit reported zero vulnerabilities. CI now runs the audit for all
+dependencies alongside the existing check and Chromium journey suite.
+
+The PR's CI run is required for the current `npm run test:e2e` result; the
+historical browser and field-research limitations below still apply.
+
+## Earlier release evidence
+
 This file records the checks run for the v0.2 decision-workspace release on
 August 9, 2026.
 
