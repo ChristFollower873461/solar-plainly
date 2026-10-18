@@ -533,6 +533,19 @@ summary:focus-visible {
   margin-top: 6px;
 }
 
+.storage-error {
+  padding: 24px;
+  text-align: center;
+}
+
+.storage-error p {
+  max-width: 44ch;
+}
+
+.storage-error button {
+  margin-top: 20px;
+}
+
 .view-loading {
   align-items: center;
   color: var(--muted);

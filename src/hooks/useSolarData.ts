@@ -6,23 +6,33 @@ import type { SolarData, UpdateSolarData } from '../types'
 export const useSolarData = () => {
   const [data, setData] = useState<SolarData>(() => createInitialData())
   const [ready, setReady] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
 
   useEffect(() => {
     let active = true
     loadSolarData()
       .then((stored) => {
-        if (active && stored) setData(stored)
+        if (!active) return
+        if (stored) setData(stored)
+        setReady(true)
       })
       .catch(() => {
-        if (active) setSaveState('error')
-      })
-      .finally(() => {
-        if (active) setReady(true)
+        if (active) {
+          setLoadError(true)
+          setSaveState('error')
+        }
       })
     return () => {
       active = false
     }
+  }, [loadAttempt])
+
+  const retryLoad = useCallback(() => {
+    setReady(false)
+    setLoadError(false)
+    setLoadAttempt((attempt) => attempt + 1)
   }, [])
 
   useEffect(() => {
@@ -54,5 +64,5 @@ export const useSolarData = () => {
     setData(createInitialData())
   }, [])
 
-  return { data, ready, saveState, update, replace, reset }
+  return { data, ready, loadError, retryLoad, saveState, update, replace, reset }
 }

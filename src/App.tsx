@@ -20,7 +20,7 @@ const SettingsPage = lazy(() =>
 function App() {
   const [view, setView] = useState<AppView>('home')
   const [reviewTab, setReviewTab] = useState<ReviewTab>('overview')
-  const { data, ready, saveState, update, replace, reset } = useSolarData()
+  const { data, ready, loadError, retryLoad, saveState, update, replace, reset } = useSolarData()
 
   const navigate = (nextView: AppView) => {
     if (nextView === 'check') setReviewTab('overview')
@@ -30,6 +30,18 @@ function App() {
   const openReview = (tab: ReviewTab) => {
     setReviewTab(tab)
     setView('check')
+  }
+
+  if (loadError) {
+    return (
+      <main className="loading-screen storage-error">
+        <img src={`${import.meta.env.BASE_URL}icon-192.png`} alt="" />
+        <h1>Your local record could not be opened</h1>
+        <p role="alert">Nothing has been overwritten. Editing is paused to protect your saved information.</p>
+        <p>Try again. If this continues, keep this browser's site data and any exported backups.</p>
+        <button className="primary-button" onClick={retryLoad} type="button">Try opening again</button>
+      </main>
+    )
   }
 
   if (!ready) {
