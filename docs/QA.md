@@ -1,5 +1,46 @@
 # Release QA
 
+## Local record preservation — October 18, 2026
+
+A failed initial IndexedDB read or schema validation previously allowed autosave
+to replace the saved record with defaults. A regression against the unchanged
+source reproduced that write. Readiness now requires a successful validated
+read; failed loading blocks editing and offers a retry without replacing or
+clearing storage. Invalid falsy stored values are also rejected, and a failed
+database open can be retried. This preserves data for recovery; it does not
+claim to repair a damaged record automatically.
+
+Validation on Node 22.23.1 / npm 10.9.8:
+
+- `npm ci --no-audit --no-fund`: passed.
+- Targeted Vitest hook/storage regressions: 12 passed. The initial-load
+  preservation case failed against the original source as expected.
+- `npm run check`: lint, all 34 unit tests, TypeScript and production/PWA build passed.
+- `npm run test:e2e` with a temporary local configuration: 25 passed, with the
+  same three project-specific skips. The configuration selected an unused
+  loopback port, disabled server reuse, limited workers to two and used no
+  retries; the existing desktop/mobile Chromium projects were unchanged.
+- The new browser cases use real IndexedDB with synthetic unsupported-schema
+  and null records. Both remain unchanged after reload and repeated failed
+  retry, then a valid synthetic record recovers successfully.
+- Error-screen captures at 1280, 375 and 320 pixels showed the retry action and
+  no horizontal overflow; the narrow view was visually inspected.
+- Independent source review passed. Database identity, schema migration,
+  local-only processing and document/financial rules are unchanged.
+
+The dependency update changes only development packages: Vitest and matching
+coverage 4.1.11, Undici 8.11.2, source-map-js 1.2.2, brace-expansion 5.0.12/2.1.7
+and fast-uri 3.1.8. All production dependency ranges and locked production
+packages are unchanged. One locked `npm audit --package-lock-only --include=dev
+--audit-level=high --json` reported zero advisories. No overrides or audit
+exceptions were added.
+
+This is local source and browser acceptance, not hosted adoption. GitHub Pages
+currently targets solarunveiled.com; the unresolved canonical-domain decision
+remains separate from this correction. No domain or provider settings changed.
+Manual Safari/Firefox, broader concurrent-tab conflicts and the earlier field
+research gaps remain unverified.
+
 ## Setup and dependency maintenance — September 5, 2026
 
 The README now states the Node versions accepted by the locked development
